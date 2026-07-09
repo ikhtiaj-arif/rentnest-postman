@@ -1,0 +1,905 @@
+{
+  "info": {
+    "_postman_id": "c9bad0e8-2bd7-4ced-be83-11229dd230bf",
+    "name": "RENT_NEST Copy",
+    "description": "RENT_NEST is a REST API for a rental property marketplace, supporting tenants, landlords, and admins.\n\n**Folders:**\n- AUTH: Registration, login, and session/profile retrieval.\n- PROPERTY: Public browsing of property listings and categories.\n- LANDLORD: Property management and rental request handling for landlords.\n- ADMIN: Platform-wide administration of rentals, properties, and users.\n- REVIEWS: Tenant reviews for properties.\n- RENTAL: Tenant-initiated rental requests.\n- PAYMENT: Stripe-based payments for approved rental requests.\n\n**Base URL:** All requests use the `{{base_url}}` collection variable (default `http://localhost:5000`). Update this variable to point at a different environment (staging, production, etc.) without editing individual requests.\n\n**Authentication:** Most endpoints outside of AUTH (register/login) and the public PROPERTY endpoints require a Bearer token obtained from the Login request, supplied via the `Authorization: Bearer <token>` header (see the PAYMENT folder for an example using the `{{tenantToken}}` variable).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "25588597",
+    "_collection_link": "https://go.postman.co/collection/25588597-c9bad0e8-2bd7-4ced-be83-11229dd230bf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "AUTH",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@example.com\",\r\n  \"name\": \"Admin Doe\",\r\n  \"password\": \"SuperSecurePassword123!\",\r\n  \"phone\": \"+1234567890\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a new user account. No authentication required. Returns the created user and, depending on backend configuration, an access token."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@example.com\",\r\n\r\n  \"password\": \"SuperSecurePassword123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates an existing user with email and password and returns an access token (Bearer token) to be used for subsequent authenticated requests. No authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Own Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Retrieves the profile of the currently authenticated user based on the provided Bearer token. Requires authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for user authentication and account access. Includes user registration, login, and retrieving the authenticated user's own profile.\n\n**Authentication:** Register and Login do not require authentication. 'Get Own Profile' requires a valid Bearer token obtained from Login.\n\n**Typical workflow:** Register -> Login -> use the returned access token as a Bearer token for subsequent authenticated requests -> Get Own Profile to verify the session."
+    },
+    {
+      "name": "PROPERTY",
+      "item": [
+        {
+          "name": "Get Property Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            },
+            "description": "Retrieves the list of available property categories (e.g., Apartment, House) used for filtering listings and for categorizing new property submissions. No authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/properties?searchTerm=dhaka&isAvailable=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "dhaka"
+                },
+                {
+                  "key": "type",
+                  "value": "Apartment",
+                  "disabled": true
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "false"
+                },
+                {
+                  "key": "landlordId",
+                  "value": "52e488c8-b8cc-4f0b-990a-d40e970f9b6a",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "10000",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "20000",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of properties. Supports filtering by search term, type, availability, landlord, and price range via query parameters. No authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Property By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/properties/b3584484-a576-49db-acd8-b176328ba8ee",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "properties",
+                "b3584484-a576-49db-acd8-b176328ba8ee"
+              ]
+            },
+            "description": "Retrieves the full details of a single property using its unique ID, provided as a path parameter. No authentication required."
+          },
+          "response": []
+        }
+      ],
+      "description": "Public endpoints for browsing available rental properties and property categories. Intended for tenants or unauthenticated visitors searching and viewing listings.\n\n**Authentication:** Not required.\n\n**Typical workflow:** Get Property Categories to see available filters -> Get All Properties to search/browse listings -> Get Property By ID to view full details of a specific property."
+    },
+    {
+      "name": "LANDLORD",
+      "item": [
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Urban Smart Loft\",\r\n    \"city\": \"Narayanganj\",\r\n    \"price\": 28000,\r\n    \"categoryName\": \"Loft\",\r\n    \"categoryDescription\": \"Contemporary loft-style living spaces with modern interiors.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/landlord/properties",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties"
+              ]
+            },
+            "description": "Creates a new property listing under the authenticated landlord's account, including category assignment. Requires Landlord authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"Deluxe House\",\r\n    \"categoryName\": \"House\",\r\n    \"categoryDescription\": \"Beachfront houses with scenic ocean views, excelent for relaxation\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/landlord/properties/b3584484-a576-49db-acd8-b176328ba8ee",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties",
+                "b3584484-a576-49db-acd8-b176328ba8ee"
+              ]
+            },
+            "description": "Updates the details of an existing property owned by the authenticated landlord, identified by the property ID in the URL path. Requires Landlord authentication and ownership of the property."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Property",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/landlord/properties/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "properties",
+                "1"
+              ]
+            },
+            "description": "Deletes a property listing owned by the authenticated landlord, identified by the property ID in the URL path. Requires Landlord authentication and ownership of the property."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Rental Requests (Landlord)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/landlord/requests?page=1&limit=10&sortBy=moveInDate&sortOrder=asc&status=pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "requests"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "approved",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "moveInDate"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of rental requests submitted by tenants for the authenticated landlord's properties. Supports filtering by status and sorting by move-in date. Requires Landlord authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Rental Request Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": \"APPROVED\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/landlord/requests/ffe05f32-1b8a-413e-9ce1-ecea3c58c162",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "landlord",
+                "requests",
+                "ffe05f32-1b8a-413e-9ce1-ecea3c58c162"
+              ]
+            },
+            "description": "Approves or rejects a pending rental request by updating its status, identified by the request ID in the URL path. Requires Landlord authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints restricted to users with the Landlord role, used to manage the landlord's own property listings and to review and respond to rental requests submitted by tenants.\n\n**Authentication:** Requires a valid Bearer token for an authenticated Landlord account. A landlord may only manage properties and requests that belong to them.\n\n**Typical workflow:** Create Property -> Update/Delete Property as needed -> Get All Rental Requests (Landlord) to review incoming tenant requests -> Update Rental Request Status to approve or reject a request."
+    },
+    {
+      "name": "ADMIN",
+      "item": [
+        {
+          "name": "Get All Rentals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/rentals?limit=20&page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "rentals"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "bogura",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "Dhaka",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "APPROVED",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "landlordId",
+                  "value": "59502b4e-9efe-4e67-816e-6080e0964b64",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of all rental requests across the platform. Supports filtering by search term, city, status, and landlord. Requires Admin authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/properties?minPrice=10000&maxPrice=20000",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "searchTerm",
+                  "value": "dhaka",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "Apartment",
+                  "disabled": true
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "landlordId",
+                  "value": "52e488c8-b8cc-4f0b-990a-d40e970f9b6a",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "10000"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "20000"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of all properties across the platform, including those not otherwise publicly surfaced. Supports filtering by price range and other criteria. Requires Admin authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "alex",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "tenant",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of all registered users. Supports filtering by search term, role, and status, and sorting. Requires Admin authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users",
+                "1"
+              ]
+            },
+            "description": "Updates the status (e.g., active/suspended) of a user account, identified by the user ID in the URL path. Requires Admin authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Administrative endpoints for platform-wide management of rentals, properties, and users.\n\n**Authentication:** Requires a valid Bearer token belonging to a user with the Admin role.\n\n**Typical workflow:** Use the listing endpoints (rentals, properties, users) to review platform activity, and Update User Status to activate, suspend, or otherwise moderate a user account."
+    },
+    {
+      "name": "REVIEWS",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n   \"rating\": 4.5,\r\n    \"comment\": \"Excelent enviroment and good views\",\r\n    \"propertyId\": \"42cd7cf8-35cc-46a2-b0de-4fd6a9a7dccf\",\r\n    \"rentalRequestId\": \"ffe05f32-1b8a-413e-9ce1-ecea3c58c162\" \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reviews",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reviews"
+              ]
+            },
+            "description": "Submits a review for a property. Typically requires the reviewer to have an approved or completed rental for the property. Requires authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for tenants to submit reviews for properties.\n\n**Authentication:** Requires a valid Bearer token. A tenant would typically only be able to review a property they have rented."
+    },
+    {
+      "name": "RENTAL",
+      "item": [
+        {
+          "name": "Create Rental Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"moveInDate\": \"2026-08-01T00:00:00.000Z\",\r\n    \"propertyId\": \"42cd7cf8-35cc-46a2-b0de-4fd6a9a7dccf\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/rentals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rentals"
+              ]
+            },
+            "description": "Submits a new rental request from a tenant for a specific property and desired move-in date. Requires Tenant authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Rental Requests",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"moveInDate\": \"2026-08-01T00:00:00.000Z\",\r\n    \"propertyId\": \"b3584484-a576-49db-acd8-b176328ba8ee\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/rentals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rentals"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "approved",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieves a paginated, filterable list of the authenticated tenant's rental requests. Supports filtering by status and sorting. Requires Tenant authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Rental Request By ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"moveInDate\": \"2026-08-01T00:00:00.000Z\",\r\n    \"propertyId\": \"b3584484-a576-49db-acd8-b176328ba8ee\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/rentals/3f89a1c8-c73e-44e1-9c10-504562d34cc4",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rentals",
+                "3f89a1c8-c73e-44e1-9c10-504562d34cc4"
+              ]
+            },
+            "description": "Retrieves the details of a single rental request using its unique ID, provided as a path parameter. Requires Tenant authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for tenants to create and track rental requests for properties. A rental request must be submitted and approved by the landlord before a payment can be created.\n\n**Authentication:** Requires a valid Bearer token for an authenticated Tenant account.\n\n**Typical workflow:** Create Rental Request for a desired property and move-in date -> Get All Rental Requests / Get Rental Request By ID to track status while the landlord reviews it."
+    },
+    {
+      "name": "PAYMENT",
+      "item": [
+        {
+          "name": "Create Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "const res = pm.response.json();",
+                  "",
+                  "pm.test('Has clientSecret', () => {",
+                  "  pm.expect(res.clientSecret || res.data?.clientSecret).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('Has paymentId', () => {",
+                  "  pm.expect(res.paymentId || res.data?.paymentId).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('Payment status is PENDING', () => {",
+                  "  const status = res.payment?.status || res.data?.payment?.status;",
+                  "  pm.expect(status).to.equal('PENDING');",
+                  "});",
+                  "",
+                  "// Auto-save IDs for next requests",
+                  "const paymentId = res.paymentId || res.data?.paymentId;",
+                  "const intentId = res.payment?.stripePaymentIntentId || res.data?.payment?.stripePaymentIntentId;",
+                  "if (paymentId) pm.collectionVariables.set('paymentId', paymentId);",
+                  "if (intentId) pm.collectionVariables.set('stripePaymentIntentId', intentId);",
+                  "",
+                  "console.log('Payment ID:', paymentId);",
+                  "console.log('Stripe Intent ID:', intentId);",
+                  "console.log('Client Secret:', res.clientSecret || res.data?.clientSecret);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tenantToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rentalRequestId\": \"ffe05f32-1b8a-413e-9ce1-ecea3c58c162\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payments/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "create"
+              ]
+            },
+            "description": "Initiates a Stripe payment for an approved rental request, creating a PaymentIntent and returning a client secret for completing the payment on the client side. Automatically saves the returned paymentId and stripePaymentIntentId as collection variables for use in subsequent requests. Requires Tenant authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Payments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "",
+                  "const res = pm.response.json();",
+                  "const payment = res.data || res;",
+                  "",
+                  "pm.test('Has payment fields', () => {",
+                  "  pm.expect(payment.id || payment.data?.id).to.exist;",
+                  "  pm.expect(payment.status || payment.data?.status).to.exist;",
+                  "  pm.expect(payment.amount || payment.data?.amount).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tenantToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of the authenticated tenant's payments, sorted by creation date. Requires Tenant authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.expect(pm.response.code).to.equal(200));",
+                  "",
+                  "const res = pm.response.json();",
+                  "const payment = res.data || res;",
+                  "",
+                  "pm.test('Has payment fields', () => {",
+                  "  pm.expect(payment.id || payment.data?.id).to.exist;",
+                  "  pm.expect(payment.status || payment.data?.status).to.exist;",
+                  "  pm.expect(payment.amount || payment.data?.amount).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tenantToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payments/{{paymentId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": "Retrieves the details and current status of a single payment using its ID. Defaults to the {{paymentId}} collection variable saved by the Create Payment request. Requires Tenant authentication."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for creating and retrieving payments for approved rental requests, integrated with Stripe.\n\n**Authentication:** Requires a valid Bearer token for an authenticated Tenant account ({{tenantToken}}).\n\n**Typical workflow:** Once a rental request has been approved by the landlord, call Create Payment to generate a Stripe PaymentIntent, then use Get Payment By ID / Get All Payments to check payment status. The Create Payment request automatically stores the returned paymentId and stripePaymentIntentId as collection variables for reuse."
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "paymentId",
+      "value": ""
+    },
+    {
+      "key": "stripePaymentIntentId",
+      "value": ""
+    }
+  ]
+}
